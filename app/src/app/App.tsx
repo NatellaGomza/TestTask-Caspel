@@ -6,8 +6,9 @@ import styles from './styles.module.scss';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { debounce } from 'lodash';
+import {debounce} from 'lodash';
 import type {DataType} from "./types.tsx";
+import {getRecords, addRecord, deleteRecord, editRecord} from '../services/RecordService';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -101,6 +102,11 @@ const App: React.FC = () => {
             },
         ];
 
+        const randomDelay = (min = 500, max = 2000) => {
+            const ms = Math.floor(Math.random() * (max - min + 1)) + min;
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         const modalFields = columns.filter(col => col.inputType);
 
         useEffect(() => {
@@ -111,14 +117,21 @@ const App: React.FC = () => {
             setFilteredData(dataSource);
         }, [dataSource]);
 
-        const getList = () => {
-            setLoadingData(true)
-            fetch('/api/record/list')
-                .then(res => res.json())
-                .then(data => {
-                    setDataSource(data.data);
-                })
-                .finally(() => setLoadingData(false));
+        // const getList = () => {
+        //     setLoadingData(true)
+        //     fetch('/api/record/list')
+        //         .then(res => res.json())
+        //         .then(data => {
+        //             setDataSource(data.data);
+        //         })
+        //         .finally(() => setLoadingData(false));
+        // }
+
+        const getList = async () => {
+            setLoadingData(true);
+            await randomDelay();
+            setDataSource(await getRecords());
+            setLoadingData(false);
         }
 
         const handleSearch = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,20 +149,26 @@ const App: React.FC = () => {
             setFilteredData(filtered);
         }, 300);
 
-        const handleDelete = (key: string) => {
-            fetch(`/api/record/delete?key=${key}`, {
-                method: 'DELETE',
-            })
-                .then(res => res.json())
-                .then(result => {
-                    if (result.code === 0) {
-                        console.log('Удалено:', key);
-                        setSearchText('');
-                        getList();
-                    } else {
-                        console.error('Ошибка удаления');
-                    }
-                });
+        const handleDelete = async (key: string) => {
+            // fetch(`/api/record/delete?key=${key}`, {
+            //     method: 'DELETE',
+            // })
+            //     .then(res => res.json())
+            //     .then(result => {
+            //         if (result.code === 0) {
+            //             console.log('Удалено:', key);
+            //             setSearchText('');
+            //             getList();
+            //         } else {
+            //             console.error('Ошибка удаления');
+            //         }
+            //     });
+            setLoadingData(true);
+            await randomDelay();
+            deleteRecord(key);
+            setSearchText('');
+            await getList();
+            setLoadingData(false);
         };
 
         const handleOk = async () => {
@@ -164,30 +183,38 @@ const App: React.FC = () => {
             if (newRecord.date) {
                 newRecord.date = dayjs(newRecord.date).tz('Europe/Minsk').format('DD.MM.YYYY');
             }
-            const url = recordToEdit ? `/api/record/edit?key=${recordToEdit}` : '/api/record'
 
             setLoadingData(true);
-            fetch(url, {
-                method: recordToEdit ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newRecord),
-            })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.code === 0) {
-                        form.resetFields();
-                        setRecordToEdit('');
-                        setOpenModal(false);
-                        setSearchText('');
-                        getList();
-                    } else {
-                        console.error(result.message);
-                    }
-                })
-                .catch(error => console.error('Ошибка запроса:', error))
-                .finally(() => setLoadingData(false));
+            await randomDelay()
+            recordToEdit ? editRecord(recordToEdit, newRecord) : addRecord(newRecord);
+            form.resetFields();
+            setRecordToEdit('');
+            setOpenModal(false);
+            setSearchText('');
+            await getList();
+            setLoadingData(false);
+            // const url = recordToEdit ? `/api/record/edit?key=${recordToEdit}` : '/api/record'
+            // fetch(url, {
+            //     method: recordToEdit ? 'PUT' : 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify(newRecord),
+            // })
+            //     .then(response => response.json())
+            //     .then(result => {
+            //         if (result.code === 0) {
+            //             form.resetFields();
+            //             setRecordToEdit('');
+            //             setOpenModal(false);
+            //             setSearchText('');
+            //             getList();
+            //         } else {
+            //             console.error(result.message);
+            //         }
+            //     })
+            //     .catch(error => console.error('Ошибка запроса:', error))
+            //     .finally(() => setLoadingData(false));
         }
 
         return (<div className={styles.wrapper}>
