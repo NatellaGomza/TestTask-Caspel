@@ -6,7 +6,6 @@ import styles from './styles.module.scss';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import {debounce} from 'lodash';
 import type {DataType} from "./types.tsx";
 import {getRecords, addRecord, deleteRecord, editRecord} from '../services/RecordService';
 
@@ -134,20 +133,17 @@ const App: React.FC = () => {
             setLoadingData(false);
         }
 
-        const handleSearch = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+        const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             setSearchText(value);
 
             const filtered = dataSource.filter(item =>
-                Object.values(item).some(val =>
-                    typeof val === 'string' || typeof val === 'number'
-                        ? String(val).toLowerCase().includes(value.toLowerCase())
-                        : false
+                Object.values(item).some(val => String(val).toLowerCase().includes(value.toLowerCase())
                 )
             );
 
             setFilteredData(filtered);
-        }, 300);
+        };
 
         const handleDelete = async (key: string) => {
             // fetch(`/api/record/delete?key=${key}`, {
@@ -267,7 +263,7 @@ const App: React.FC = () => {
                     ))}
                 </Form>
             </Modal>
-            <Table<DataType> className={styles.table} columns={columns} dataSource={filteredData} loading={loadingData}/>
+            <Table<DataType> pagination={false} className={styles.table} columns={columns} dataSource={filteredData} loading={loadingData}/>
         </div>)
     }
 ;
