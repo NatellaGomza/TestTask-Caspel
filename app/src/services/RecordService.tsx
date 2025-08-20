@@ -1,10 +1,10 @@
 import type { DataType } from '../app/types';
-import { get, findIndex, remove, cloneDeep } from 'lodash';
+import { findIndex, remove, cloneDeep } from 'lodash';
 
 const STORAGE_KEY = 'records';
 
 function getLocalRecords(): DataType[] {
-    return get(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'), [], []);
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 }
 
 export async function getRecords(): Promise<DataType[]> {
