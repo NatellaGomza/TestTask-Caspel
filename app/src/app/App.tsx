@@ -116,16 +116,6 @@ const App: React.FC = () => {
             setFilteredData(dataSource);
         }, [dataSource]);
 
-        // const getList = () => {
-        //     setLoadingData(true)
-        //     fetch('/api/record/list')
-        //         .then(res => res.json())
-        //         .then(data => {
-        //             setDataSource(data.data);
-        //         })
-        //         .finally(() => setLoadingData(false));
-        // }
-
         const getList = async () => {
             setLoadingData(true);
             await randomDelay();
@@ -146,19 +136,6 @@ const App: React.FC = () => {
         };
 
         const handleDelete = async (key: string) => {
-            // fetch(`/api/record/delete?key=${key}`, {
-            //     method: 'DELETE',
-            // })
-            //     .then(res => res.json())
-            //     .then(result => {
-            //         if (result.code === 0) {
-            //             console.log('Удалено:', key);
-            //             setSearchText('');
-            //             getList();
-            //         } else {
-            //             console.error('Ошибка удаления');
-            //         }
-            //     });
             setLoadingData(true);
             await randomDelay();
             deleteRecord(key);
@@ -189,28 +166,6 @@ const App: React.FC = () => {
             setSearchText('');
             await getList();
             setLoadingData(false);
-            // const url = recordToEdit ? `/api/record/edit?key=${recordToEdit}` : '/api/record'
-            // fetch(url, {
-            //     method: recordToEdit ? 'PUT' : 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify(newRecord),
-            // })
-            //     .then(response => response.json())
-            //     .then(result => {
-            //         if (result.code === 0) {
-            //             form.resetFields();
-            //             setRecordToEdit('');
-            //             setOpenModal(false);
-            //             setSearchText('');
-            //             getList();
-            //         } else {
-            //             console.error(result.message);
-            //         }
-            //     })
-            //     .catch(error => console.error('Ошибка запроса:', error))
-            //     .finally(() => setLoadingData(false));
         }
 
         return (<div className={styles.wrapper}>
